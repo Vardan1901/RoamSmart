@@ -1,4 +1,4 @@
-# Roam Smart - Travel Management System
+# RoamSmart - Travel Management System
 
 Roam Smart is a comprehensive travel management system that helps users plan, track, and manage their trips efficiently. The application provides features for managing trip details, expenses, and real-time weather information.
 
@@ -41,8 +41,8 @@ Roam Smart is a comprehensive travel management system that helps users plan, tr
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/roam-smart.git
-   cd roam-smart
+   git clone https://github.com/Vardan1901/RoamSmart.git
+   cd RoamSmart
    ```
 
 2. Create and activate a virtual environment:
