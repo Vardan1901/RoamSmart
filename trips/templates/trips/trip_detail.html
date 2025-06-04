@@ -1,0 +1,561 @@
+{% extends 'base.html' %}
+{% load trip_filters %}
+{% load static %}
+
+{% block title %}{{ trip.destination }} - Trip Details{% endblock %}
+
+{% block extra_head %}
+<!-- Add Chart.js from CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<!-- Add Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    }
+    .bg-gradient-success {
+        background: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);
+    }
+    .bg-gradient-info {
+        background: linear-gradient(135deg, #36b9cc 0%, #258391 100%);
+    }
+    .bg-gradient-warning {
+        background: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%);
+    }
+    .bg-gradient-danger {
+        background: linear-gradient(135deg, #e74a3b 0%, #be2617 100%);
+    }
+    .card {
+        border: none;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    }
+    .card-header {
+        background-color: #f8f9fc;
+        border-bottom: 1px solid #e3e6f0;
+    }
+    .text-gradient {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .chart-container {
+        position: relative;
+        height: 300px;
+        width: 100%;
+        margin: 20px 0;
+    }
+    #expenseChart {
+        max-width: 100%;
+        max-height: 100%;
+    }
+    .weather-card {
+        background: linear-gradient(135deg, #00b4db, #0083b0);
+        color: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .weather-icon {
+        font-size: 3rem;
+        margin-bottom: 10px;
+    }
+    .forecast-item {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        padding: 10px;
+        margin: 5px 0;
+    }
+    .budget-alert {
+        background-color: #fff3cd;
+        border-color: #ffeeba;
+        color: #856404;
+    }
+    .receipt-preview {
+        max-width: 100px;
+        max-height: 100px;
+        object-fit: cover;
+        border-radius: 5px;
+    }
+    .status-badge {
+        font-size: 0.9rem;
+        padding: 5px 10px;
+        border-radius: 15px;
+    }
+    .status-planning { background-color: #e3f2fd; color: #1976d2; }
+    .status-active { background-color: #e8f5e9; color: #2e7d32; }
+    .status-completed { background-color: #f3e5f5; color: #7b1fa2; }
+    .status-cancelled { background-color: #ffebee; color: #c62828; }
+    .weather-card .bg-light {
+        background-color: rgba(255, 255, 255, 0.95) !important;
+        color: #333;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+    .weather-icon-sm {
+        width: 50px;
+        height: 50px;
+    }
+    .forecast-item {
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+    .forecast-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+    }
+    .weather-details i {
+        width: 20px;
+        text-align: center;
+        margin-right: 5px;
+    }
+    .forecast-date {
+        line-height: 1.2;
+    }
+    .forecast-date .date {
+        font-size: 0.9rem;
+        color: #666;
+    }
+    .forecast-date .time {
+        font-size: 0.8rem;
+    }
+    .temperature {
+        font-size: 1.2rem;
+        font-weight: 500;
+    }
+    .weather-desc {
+        font-size: 0.9rem;
+        margin-top: 5px;
+    }
+    .current-time {
+        font-size: 0.9rem;
+        color: #666;
+    }
+    .weather-icon {
+        font-size: 3rem;
+        margin-bottom: 10px;
+    }
+    .weather-icon-sm {
+        width: 50px;
+        height: 50px;
+    }
+    .forecast-item {
+        transition: transform 0.2s;
+    }
+    .forecast-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .weather-details i {
+        width: 20px;
+        text-align: center;
+        margin-right: 5px;
+    }
+    .forecast-date {
+        line-height: 1.2;
+    }
+    .forecast-date .date {
+        font-size: 0.9rem;
+        color: #666;
+    }
+    .forecast-date .time {
+        font-size: 0.8rem;
+    }
+    .temperature {
+        font-size: 1.2rem;
+        font-weight: 500;
+    }
+    .weather-desc {
+        font-size: 0.9rem;
+        margin-top: 5px;
+    }
+    .current-time {
+        font-size: 0.9rem;
+        color: #666;
+    }
+    .avg-temp {
+        font-size: 1.4rem;
+        font-weight: 500;
+        margin-bottom: 2px;
+    }
+    .temp-range {
+        color: #666;
+    }
+    .weather-icon-large {
+        width: 80px;
+        height: 80px;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    }
+    .weather-info p {
+        transition: transform 0.2s;
+    }
+    .weather-info p:hover {
+        transform: translateX(5px);
+    }
+    .weather-actions .btn-light {
+        background: rgba(255, 255, 255, 0.9);
+        border: none;
+        transition: all 0.3s ease;
+    }
+    .weather-actions .btn-light:hover {
+        background: white;
+        transform: rotate(180deg);
+    }
+    .display-6 {
+        font-size: 2.5rem;
+        font-weight: 300;
+        line-height: 1.2;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <!-- Trip Information -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h2 class="card-title mb-0">
+                            {{ trip.destination }}
+                            <span class="status-badge status-{{ trip.status }} ms-2">
+                                {{ trip.get_status_display }}
+                            </span>
+                        </h2>
+                        <div class="btn-group">
+                            <a href="{% url 'edit_trip' trip.id %}" class="btn btn-primary">
+                                <i class="fas fa-edit"></i> Edit Trip
+                            </a>
+                            <a href="{% url 'delete_trip' trip.id %}" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Delete Trip
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p><strong>Dates:</strong> {{ trip.start_date|date:"M d, Y" }} - {{ trip.end_date|date:"M d, Y" }}</p>
+                            <p><strong>Budget:</strong> {{ trip.budget|inr }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Total Expenses:</strong> {{ total_expenses|inr }}</p>
+                            <p><strong>Remaining Budget:</strong> {{ budget_remaining|inr }}</p>
+                        </div>
+                    </div>
+
+                    {% if trip.description %}
+                    <div class="mb-3">
+                        <h5>Description</h5>
+                        <p>{{ trip.description }}</p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Budget Progress -->
+                    <div class="mb-4">
+                        <h5>Budget Progress</h5>
+                        <div class="progress">
+                            <div class="progress-bar {% if budget_percentage >= 90 %}bg-danger{% elif budget_percentage >= 75 %}bg-warning{% else %}bg-success{% endif %}" 
+                                 role="progressbar" 
+                                 style="width: {{ budget_percentage }}%"
+                                 aria-valuenow="{{ budget_percentage }}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                                {{ budget_percentage|floatformat:1 }}%
+                            </div>
+                        </div>
+                        {% if budget_percentage >= 90 %}
+                        <div class="alert budget-alert mt-2">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Warning: You have reached {{ budget_percentage|floatformat:1 }}% of your budget!
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Weather Information -->
+                    {% if weather_data %}
+                    <div class="weather-card">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4 class="mb-0">Weather in {{ trip.destination }}</h4>
+                            <div class="weather-actions">
+                                <small class="text-white-50 me-3">
+                                    <i class="fas fa-sync-alt"></i> Last updated: {{ weather_data.current.datetime|date:"h:i A" }}
+                                </small>
+                                <a href="?refresh_weather=true" class="btn btn-light btn-sm">
+                                    <i class="fas fa-sync-alt"></i> Refresh
+                                </a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <!-- Current Weather -->
+                            <div class="col-md-4">
+                                <div class="current-weather p-3 bg-light rounded shadow-sm">
+                                    <h5 class="border-bottom pb-2 text-primary">
+                                        <i class="fas fa-sun me-2"></i>Current Weather
+                                    </h5>
+                                    <div class="current-time mb-2 text-muted">
+                                        <i class="fas fa-clock"></i> {{ weather_data.current.datetime|date:"F d, Y h:i A" }}
+                                    </div>
+                                    <div class="weather-icon text-center mb-3">
+                                        <img src="http://openweathermap.org/img/wn/{{ weather_data.current.icon }}@2x.png" 
+                                             alt="{{ weather_data.current.description }}"
+                                             class="weather-icon-large">
+                                    </div>
+                                    <div class="weather-details">
+                                        <h3 class="text-center mb-3 display-6">{{ weather_data.current.temperature|floatformat:1 }}°C</h3>
+                                        <div class="weather-info">
+                                            <p class="mb-2"><i class="fas fa-cloud text-primary"></i> {{ weather_data.current.description|title }}</p>
+                                            <p class="mb-2"><i class="fas fa-temperature-high text-danger"></i> Feels like: {{ weather_data.current.feels_like|floatformat:1 }}°C</p>
+                                            <p class="mb-2"><i class="fas fa-tint text-info"></i> Humidity: {{ weather_data.current.humidity }}%</p>
+                                            <p class="mb-2"><i class="fas fa-wind text-secondary"></i> Wind: {{ weather_data.current.wind_speed }} m/s</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 5-Day Forecast -->
+                            <div class="col-md-8">
+                                <h5 class="mb-3 text-white">
+                                    <i class="fas fa-calendar-alt me-2"></i>5-Day Weather Forecast
+                                </h5>
+                                <div class="forecast-list">
+                                    {% for forecast in weather_data.forecast %}
+                                    <div class="forecast-item mb-3 p-3 bg-light rounded shadow-sm">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-3">
+                                                <div class="forecast-date">
+                                                    <strong class="text-primary">{{ forecast.day }}</strong>
+                                                    <div class="date text-muted">{{ forecast.date }}</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3 text-center">
+                                                <img src="http://openweathermap.org/img/wn/{{ forecast.icon }}@2x.png" 
+                                                     alt="{{ forecast.description }}"
+                                                     class="weather-icon-sm mb-2">
+                                                <div class="weather-desc text-primary">{{ forecast.description|title }}</div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="temperature">
+                                                    <div class="avg-temp text-dark">{{ forecast.temperature }}°C</div>
+                                                    <div class="temp-range small">
+                                                        <span class="text-danger"><i class="fas fa-arrow-up"></i> {{ forecast.max_temp }}°</span> / 
+                                                        <span class="text-primary"><i class="fas fa-arrow-down"></i> {{ forecast.min_temp }}°</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="weather-details small">
+                                                    <div class="mb-1"><i class="fas fa-tint text-info"></i> Humidity: {{ forecast.humidity }}%</div>
+                                                    <div><i class="fas fa-wind text-secondary"></i> Wind: {{ forecast.wind_speed }} m/s</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Expenses Section -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3 class="card-title mb-0">Expenses</h3>
+                        <a href="{% url 'create_expense' trip.id %}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Add Expense
+                        </a>
+                    </div>
+
+                    {% if expenses %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Name</th>
+                                    <th>Category</th>
+                                    <th>Amount</th>
+                                    <th>Receipt</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for expense in expenses %}
+                                <tr>
+                                    <td>{{ expense.date|date:"M d, Y" }}</td>
+                                    <td>{{ expense.name }}</td>
+                                    <td>{{ expense.get_category_display }}</td>
+                                    <td>{{ expense.amount|inr }}</td>
+                                    <td>
+                                        {% if expense.receipt %}
+                                        <a href="{{ expense.receipt.url }}" target="_blank">
+                                            <img src="{{ expense.receipt.url }}" class="receipt-preview" alt="Receipt">
+                                        </a>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{% url 'edit_expense' trip.id expense.id %}" 
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{% url 'delete_expense' trip.id expense.id %}" 
+                                               class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Expense Categories Chart -->
+                    <div class="mt-4">
+                        <h5>Expenses by Category</h5>
+                        <div class="chart-container">
+                            <canvas id="expenseChart"></canvas>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No expenses recorded yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <!-- Trip Summary -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h4 class="card-title">Trip Summary</h4>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Duration:</span>
+                            <span>{{ trip.start_date|timeuntil:trip.end_date }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Total Expenses:</span>
+                            <span>{{ total_expenses|inr }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Budget Used:</span>
+                            <span>{{ budget_percentage|floatformat:1 }}%</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Status:</span>
+                            <span class="status-badge status-{{ trip.status }}">
+                                {{ trip.get_status_display }}
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Quick Actions</h4>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'create_expense' trip.id %}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Add Expense
+                        </a>
+                        <a href="{% url 'edit_trip' trip.id %}" class="btn btn-outline-primary">
+                            <i class="fas fa-edit"></i> Edit Trip
+                        </a>
+                        <a href="{% url 'trip_list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Trips
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        // Get the expense data from the template
+        const expenseData = {{ expense_data|safe }};
+        console.log('Expense data:', expenseData);
+        
+        // Check if we have data to display
+        if (!expenseData || expenseData.length === 0) {
+            console.log('No expense data available');
+            return;
+        }
+        
+        // Get the canvas element
+        const canvas = document.getElementById('expenseChart');
+        if (!canvas) {
+            console.error('Could not find expenseChart canvas element');
+            return;
+        }
+        
+        // Destroy any existing chart
+        const existingChart = Chart.getChart(canvas);
+        if (existingChart) {
+            existingChart.destroy();
+        }
+        
+        // Create the pie chart
+        const ctx = canvas.getContext('2d');
+        console.log('Creating chart with data:', {
+            labels: expenseData.map(item => item.category),
+            data: expenseData.map(item => item.amount)
+        });
+        
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: expenseData.map(item => item.category),
+                datasets: [{
+                    data: expenseData.map(item => item.amount),
+                    backgroundColor: [
+                        '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b',
+                        '#5a5c69', '#858796', '#6f42c1', '#20c9a6', '#f8f9fc'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return `${label}: ₹${value.toLocaleString()} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        console.log('Chart created successfully');
+    } catch (error) {
+        console.error('Error creating expense chart:', error);
+    }
+});
+</script>
+{% endblock %}
+{% endblock %} 

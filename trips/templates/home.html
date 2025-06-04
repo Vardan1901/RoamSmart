@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome to Roam Smart{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Hero Section -->
+    <div class="text-center py-5">
+        <h1 class="display-4 mb-4">Welcome to Roam Smart</h1>
+        <p class="lead mb-4">Your personal travel companion for planning trips and managing expenses</p>
+        {% if not user.is_authenticated %}
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{% url 'login' %}" class="btn btn-primary btn-lg">Login</a>
+                <a href="{% url 'signup' %}" class="btn btn-outline-primary btn-lg">Sign Up</a>
+            </div>
+        {% else %}
+            <a href="{% url 'trip_list' %}" class="btn btn-primary btn-lg">View My Trips</a>
+        {% endif %}
+    </div>
+
+    <!-- Features Section -->
+    <div class="row g-4 py-5">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h3 class="card-title h4">Plan Your Trips</h3>
+                    <p class="card-text">Create and manage your travel plans with ease. Set destinations, dates, and budgets for each trip.</p>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'create_trip' %}" class="btn btn-outline-primary">Create New Trip</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h3 class="card-title h4">Track Expenses</h3>
+                    <p class="card-text">Log and categorize your travel expenses. Keep track of your spending for each trip.</p>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'trip_list' %}" class="btn btn-outline-primary">View Trips & Expenses</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h3 class="card-title h4">Stay Organized</h3>
+                    <p class="card-text">Keep all your travel information in one place. Access your trip details and expenses anytime.</p>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'trip_list' %}" class="btn btn-outline-primary">Manage Trips</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- How It Works Section -->
+    <div class="py-5">
+        <h2 class="text-center mb-4">How It Works</h2>
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="text-center">
+                    <div class="h1 text-primary mb-3">1</div>
+                    <h4>Sign Up</h4>
+                    <p>Create your free account to get started</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center">
+                    <div class="h1 text-primary mb-3">2</div>
+                    <h4>Create Trips</h4>
+                    <p>Add your travel plans with destinations and dates</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center">
+                    <div class="h1 text-primary mb-3">3</div>
+                    <h4>Log Expenses</h4>
+                    <p>Track your spending for each trip</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center">
+                    <div class="h1 text-primary mb-3">4</div>
+                    <h4>Stay Organized</h4>
+                    <p>Access your travel information anytime</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

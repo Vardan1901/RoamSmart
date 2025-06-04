@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% load trip_filters %}
+
+{% block title %}Your Trips – Roam Smart{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Your Trips</h1>
+        <a href="{% url 'create_trip' %}" class="btn btn-primary">Create New Trip</a>
+    </div>
+
+    <!-- Active Trips -->
+    {% if active_trips %}
+    <h2 class="h4 mb-3">Active Trips</h2>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-4">
+        {% for trip in active_trips %}
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ trip.destination }}</h5>
+                        <p class="card-text text-muted">
+                            {{ trip.start_date|date:"M d, Y" }} - {{ trip.end_date|date:"M d, Y" }}
+                        </p>
+                        <p class="card-text">
+                            <strong>Budget:</strong> {{ trip.budget|inr }}
+                        </p>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'trip_detail' trip.id %}" class="btn btn-outline-primary flex-grow-1">
+                                View Details
+                            </a>
+                            <a href="{% url 'create_expense' trip.id %}" class="btn btn-outline-success">
+                                Log Expense
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-footer text-muted">
+                        Created {{ trip.created_at|date:"M d, Y" }}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Upcoming Trips -->
+    {% if upcoming_trips %}
+    <h2 class="h4 mb-3">Upcoming Trips</h2>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-4">
+        {% for trip in upcoming_trips %}
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ trip.destination }}</h5>
+                        <p class="card-text text-muted">
+                            {{ trip.start_date|date:"M d, Y" }} - {{ trip.end_date|date:"M d, Y" }}
+                        </p>
+                        <p class="card-text">
+                            <strong>Budget:</strong> {{ trip.budget|inr }}
+                        </p>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'trip_detail' trip.id %}" class="btn btn-outline-primary flex-grow-1">
+                                View Details
+                            </a>
+                            <a href="{% url 'create_expense' trip.id %}" class="btn btn-outline-success">
+                                Log Expense
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-footer text-muted">
+                        Created {{ trip.created_at|date:"M d, Y" }}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Past Trips -->
+    {% if past_trips %}
+    <h2 class="h4 mb-3">Past Trips</h2>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-4">
+        {% for trip in past_trips %}
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ trip.destination }}</h5>
+                        <p class="card-text text-muted">
+                            {{ trip.start_date|date:"M d, Y" }} - {{ trip.end_date|date:"M d, Y" }}
+                        </p>
+                        <p class="card-text">
+                            <strong>Budget:</strong> {{ trip.budget|inr }}
+                        </p>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'trip_detail' trip.id %}" class="btn btn-outline-primary flex-grow-1">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-footer text-muted">
+                        Created {{ trip.created_at|date:"M d, Y" }}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if not active_trips and not upcoming_trips and not past_trips %}
+        <div class="alert alert-info">
+            You haven't created any trips yet. <a href="{% url 'create_trip' %}" class="alert-link">Create your first trip</a>!
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 
